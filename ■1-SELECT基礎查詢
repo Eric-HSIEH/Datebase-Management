@@ -1,0 +1,66 @@
+■ 指定欄位與表格
+
+  select * from city
+  select ID, Name from city
+  
+■ 別名(as)
+
+  select ename, salary * 12 as AnnualSalary from cmdev.emp     # 也可不用打as，直接用空格
+  select ename, salary * 12 as "Annual Salary" from cmdev.emp  # 若別名要使用空格，須加上雙引號
+
+■ 條件查詢(where)
+
+  □ 比較運算子(=   !=     <    >     <=    >=)
+
+    select * from city where population < 800
+    select * from cmdev.emp < "1981-09-08"
+
+  □ 邏輯運算子(not    &&     and    ||    or    xor)
+
+    select * from city where population < 800 and countrycode = "TWN"
+    select * from city where population < 800 and (countrycode = "TWN" or countrycode = "JPN" )  # 若有優先判斷式，要加上括號
+
+  □ 其他條件運算子(between...and...      is     is not    like)
+
+    select * from city where population between 800 and 900
+    select * from city where countrycode in ("TWN", "USA", "JPN")
+
+  □ NULL值的判斷
+
+    select * from city where population is null        # 或用<=>代表is
+    select * from city where population is not null    
+
+  □ 字串樣式
+
+    select * from city where name like "w%"       # %代表0到多個任意字元
+    select * from city where name like "%w"       
+    select * from city where name like "%w%"      
+    select * from city where name like "w_"       # _代表1個任意字元
+    select * from city where name like "w__"      
+    select * from city where name like "____w%"   
+
+■ 排序(order by)
+
+  select * from city order by countrycode (ASC)       # 預設為小到大  
+  select * from city order by countrycode DESC        # 大到小
+  select * from city order by countrycode, Name       # 按照多組欄位排序
+  select salary * 12 from city order by salary * 12   # 依照運算式排序
+  select salary as S from city order by S             # 依照別名排序  
+  select name, salary from city order by 2            # 依照查詢回傳的欄位順序排序(依照salary排序)  
+
+■ 限制查詢
+
+  □ 指定回傳資料數量(limit)
+
+    select * from city limit 5                   # 只回傳前5筆資料
+    select * from city limit 5, 5                # 跳過前5筆資料，並回傳5筆資料
+    select * from city order by salary limit 5   # 配合排序回傳「排名」類別
+
+  □ 排除重複資料(distinct)
+
+    select distinct name from city
+    
+ ■ 參考來源
+  
+  MySQL 超新手入門（3）SELECT 基礎查詢
+  http://www.codedata.com.tw/database/mysql-tutorial-basic-query/
