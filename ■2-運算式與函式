@@ -1,0 +1,148 @@
+■ 值與運算式
+
+  □ 數值
+    
+    - 小數位數最多30位
+    - 近似值為可能因為進位而產生差異，如0.1+0.2 等於 0.3，但0.1E0+0.2E0 不等於 0.3E0
+    - 科學表示法：5E+3(或5E3)表示5*10的3次方、5E-3表示5*10的-3次方
+    
+  □ 字串值
+  
+    - 如果把數字的字串符做運算，會將字符轉成數值進行運算
+    - 若要將兩個字串連接起來，須先改變MySQL模式：
+      SET sql_mode = 'PIPES_AS_CONCAT'
+      select "HELLO" || "WORLD!"  # 使用||符號來「連接」字串
+      
+  □ 日期與時間值
+  
+    - 如果把數字的字串符做運算，會將字符轉成數值進行運算    
+    - 若以兩個數字表示日期，則00-69表示2000-2069，若70-99表示1970-1999
+    - select "1995-01-10" + interval 1 month  # 日期的運算： +(-) interval 數字 時間單位
+  
+  □ NULL值
+  
+    - 如果把數字的字串符做運算，會將字符轉成數值進行運算
+    - NULL值與其他任何值都不同，包含NULL自己
+    - 若運算或比較的值包含NULL，結果都會是NULL
+  
+■ 函式
+
+  - 函式名稱和參數的左括號中間不能有空格  
+  
+  □ 日期時間函式
+  
+   - CURDATE()：取得目前日期，相同功能：CURRENT_DATE、CURRENT_DATE()
+   - CURTIME()：取得目前時間，相同功能：CURRENT_TIME、CURRENT_TIME()
+   - YEAR(日期)：傳回[日期]的年
+   - MONTH(日期) 數字 傳回[日期]的月
+   - DAY(日期)：傳回[日期]的日，相同功能：DAYOFMONTH()
+   - MONTHNAME(日期)：傳回[日期]的月份名稱
+   - DAYNAME(日期)：傳回[日期]的星期名稱
+   - DAYOFWEEK(日期)：傳回[日期]的星期，1到7的數字，表示星期日、一、二…
+   - DAYOFYEAR(日期)：傳回[日期]的日數，1到366的數字，表示一年中的第幾天
+   - QUARTER(日期)：傳回[日期]的季，1到4的數字，代表春、夏、秋、冬
+   - EXTRACT(單位 FROM 日期/時間)：傳回[日期]中指定的[單位]資料
+   - HOUR(時間)：傳回[時間]的時
+   - MINUTE(時間)：傳回[時間]的分-SECOND(時間)：傳回[時間]的秒
+   
+   - ADDDATE(日期, 天數)：傳回[日期]在指定[天數] 以後的日期
+   - ADDDATE(日期, INTERVAL 數字 單位)：傳回[日期]在指定[數字]的[單位]以後的日期
+   - ADDTIME(日期時間, INTERVAL數字 單位)：傳回[日期時間]在指定[數字]的[單位]以後的日期時間
+   - SUBDATE(日期, 天數)：傳回[日期]在指定[天數] 以前的日期
+   - SUBDATE(日期, INTERVAL 數字 單位)：傳回[日期]在指定[數字]的[單位]以前的日期
+   - SUBTIME(日期時間, INTERVAL數字 單位)：傳回[日期時間]在指定[數字]的[單位]以前的日期時間
+   - DATEDIFF(日期1, 日期2)：計算兩個日期差異的天數
+    
+  □ 字串函式
+  
+   - LOWER(字串)：轉換為小寫
+   - UPPER(字串)：轉換為大寫
+   - LPAD(字串1, 長度, 字串2)：如果[字串1]的長度小於指定的[長度]，就在[字串1]左邊使用[字串2]補滿
+   - RPAD(字串1, 長度, 字串2)：如果[字串1]的長度小於指定的[長度]，就在[字串1]右邊使用[字串2]補滿
+   - LTRIM(字串)：移除左邊的空白
+   - RTRIM(字串)：移除右邊的空白
+   - TRIM(字串)：移除左右的空白
+   - REPEAT(字串, 個數)：重複[字串]指定的[個數]
+   - REPLACE(字串1, 字串2, 字串3)：將[字串1]中的[字串2]替換為[字串3]
+   - SUBSTRING(字串, 位置, 長度)：傳回[字串]中從指定的[位置]開始，到指定[長度]的內容
+   - CONCAT(參數 [,…])：傳回所有參數連接起來的字串。若有NULL則結果會是NULL
+   - CONCAT_WS(分隔字串, 參數 [,…])：傳回所有參數連接起來的字串，參數之間插入指定的[分隔字串]。若有NULL則結果會忽略NULL
+   - LENGTH(字串)：傳回[字串]的長度(bytes)
+   - CHAR_LENGTH(字串)：傳回[字串]的長度(字元個數)
+   - LOCATE(字串1, 字串2)：傳回[字串1]在[字串2]中的位置，如果[字串2]中沒有[字串1]指定的內容就傳回0
+      
+   - 將資料向右對齊
+   
+      select lpad(Name, 50, " ")
+      from country
+      where Continent = "Antarctica"
+ 
+  □ 數學函式
+  
+   - ROUND(數字)：四捨五入到整數
+   - ROUND(數字, 位數)：四捨五入到指定的位數
+   - CEIL(數字)、CEILING(數字)：進位到整數
+   - FLOOR(數字)：捨去所有小數
+   - TRUNCATE(數字, 位數)：將指定的[數字]捨去指定的[位數]
+   - PI()：圓周率
+   - POW(數字1, 數字2)、POWER(數字, 數字2)：[數字1]的[數字2]次方
+   - RAND()：亂數
+   - SQRT(數字)：[數字]的平方根
+
+  □ 流程控制函式
+
+   - if ：
+   
+      select ename, hiredate,
+             if(year(hiredate) < 1985, "S", "O")
+      from cmdev.emp
+      order by hiredate
+
+  - case：
+  
+      select ename, salary,
+	        case
+	          when salary >= 3000 then "A"
+	          when salary >= 1000 and salary <= 2999 then "B"
+            else "C"
+	        end SalaryGrace
+      from cmdev.emp
+
+  --------------------------------------------------
+      select Name, Continent,   # 使用洲名來判斷
+	        case Continent
+	          when "Asia" then "AS"
+	          when "Europe" then "EU"
+            else "C"
+	       end ContinentCode
+      from country
+
+  □ 其他函式
+  
+    - IFNULL(參數, 運算式)：如果[參數]為NULL就傳回[運算式]的值；否則傳回[參數]的值
+    - ISNULL(參數)：如果[參數]為NULL就傳回TRUE；否則傳回FALSE
+
+        select ename, salary, comm, 
+               salary + ifnull(comm, 0) FullSalary # 先判斷comm是否為NULL，再做相加
+        from cmdev.emp
+
+■ 群組查詢
+
+  □ 其他函式
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
