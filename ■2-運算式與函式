@@ -128,21 +128,38 @@
 
 ■ 群組查詢
 
-  □ 其他函式
+  □ 群組函式
 
+    - MAX(運算式)：最大值
+    - MIN(運算式)：最小值
+    - SUM(運算式)：合計
+    - AVG(運算式)：平均
+    - COUNT([DISTINCT]*|運算式)：使用「DISTINCT」時，重複的資料不會計算；使用[*]時，計算表格紀錄的數量：使用[運算式]時，計算的數量不會包含「NULL」值
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  □ GROUP_CONCAT函式
   
+    - 將回傳的字串以逗號分隔，組合成一筆資料。以order by排序。以separator指定分隔符號。以distinct排除重複資料。    	select group_concat(DISTINCTdname ORDER BY dname separator "|")
+	from cmdev.dept
+	
+  □ GROUP BY與HAVING子句
+
+    select Continent, sum(Population) p
+    from country
+    group by Continent, Region  DESC
+   
+    select Continent, count(*) A
+    from country
+    group by Continent with rollup     # with rollup為加上總計
+    
+    
+    select Region , SUM(Population)
+    from country
+    group by Region
+    having sum(Population) > 1000000    # 若群組化要篩選要用having
+    
+   - 沒有使用群組函式的欄位，一定要全部出現在group by子句中，預防狀況可用：
+   
+      SET sql_mode = 'ONLY_FULL_GROUP_BY'
+   
+參考來源：MySQL 超新手入門（4）運算式與函式
+http://www.codedata.com.tw/database/mysql-tutorial-4-expression-function/
