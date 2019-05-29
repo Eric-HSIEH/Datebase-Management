@@ -1,0 +1,89 @@
+■ 取得表格資訊(DESCRIBE)
+
+  □ DESCRIBE指令與欄位順序
+  
+   - 「DESCRIBE」是MySQL資料庫提供的指令，它只能在MySQL資料庫中使用，
+     這個指令可以取得某個表格的結構資訊。
+   - describe cmdev.emp
+   - 每個表格在設計時，會事先決定欄位的順序，可由describe查看欄位順序。
+    
+■ 新增(insert into...values...)(insert into...set...)
+
+  □ 基礎新增敘述 ： 
+  
+   1. insert into 表名 values(值, 值, 值)  其中新增的值數量、順序都要符合預設
+   2. insert into 表名 set 欄名1 = 值,欄名2 = 值
+  
+    insert into cmdev.dept values(60, "EDU", default)       # 可用default帶入預設值
+    insert into cmdev.dept set depto = 60, dname = "EDU"    # 新增的另一種寫法
+    
+    insert into cmdev.dept (dname, depto, location) values("EDU", 60, default)  # 按照自己輸入的欄位名稱順序，新增值
+    
+    insert into cmdev.dept () valuses ()  # 全部用預設值新增，但若欄位的預設值為NULL，要注意某些欄位是否不可為NULL
+
+  □ 同時新增多筆紀錄
+
+    insert into cmdev.dept values
+    (60, "EDU", default),
+    (70, "USA", default),
+    (100, "TWN", default)
+
+  □ 索引值
+
+    表格在設計時，會設定一個欄位為「主索引欄位」，所以新增資料時，不能違反主索引欄位的規定：資料不能重複，可用ignore來忽略錯誤值
+    
+    insert ignore into cmdev.dept
+    values (50, "EDU", default)
+
+  □ 索引值與ON DUPLICATE KEY UPDATE
+  
+    可在新增資料時加上關鍵字ON DUPLICATE KEY UPDATE，用來指定在違反重複索引值的規定時要執行的修改。
+    
+    insert into cmdev.travel 
+    values(7900, "BOSTON", 1) 
+    on duplicate key update counter = counter + 1   # 若該筆資料已存在，則將該筆的counter+1
+
+  □ 「REPLACE」敘述
+  
+    replace基本上與insert into用法相同，即replace...values...與replace...set...，
+    但當違反索引值時規定時，會取代掉原本索引值內容，如下將會取代原先索引值為50的內容：
+    
+    replace into cmdev.dept
+    values(50, "MIS", default)  
+    
+■ 修改(UPDATE)
+
+  □ 搭配「IGNORE」
+  
+    update ignore cmdev.dept   #  使用ignore防止錯誤發生，但若該欄位為儲存數值類別，但更新為儲存字串類別，則ignore會將字串類別轉成數值0
+    set deptno = 50
+    where deptno = 30
+
+  □ 搭配「ORDER BY」與「LIMIT」
+  
+    - limit用於修改時，只有一個數字一種用法
+    
+    update cmdev.dept
+    set salary = salary + 100
+    order by salary  # 先按照薪水低到高排序，再將前三個員工薪水加薪
+    limit 3 
+
+■ 刪除(DELETE)
+
+  □ 「DELETE」敘述
+  
+    delete from cmdev.emp     # 刪除薪水小於1500的資料
+    where salary < 1500
+
+    delete from cmdev.emp     # 刪除薪水最高的前3筆資料
+    order by salary DESC
+    limit 3
+
+  □ 「TRUNCATE」敘述
+  
+    - 如果要刪除一個表格中所有的紀錄，你可以選擇使用TRUNCATE，TRUNCATE的效率會比DELETE好。
+      
+    TRUNCATE TABLE cmdev.emp
+    
+參考來源：MySQL 超新手入門（6）CRUD 與資料維護
+http://www.codedata.com.tw/database/mysql-tutorial-6-crud-maintenance/
