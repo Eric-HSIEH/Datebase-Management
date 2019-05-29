@@ -1,0 +1,58 @@
+■ Inner Join
+
+  □ 使用結合條件(where)
+  
+    select country.Code , country.Capital, city.Name
+    from country, city
+    where country.Capital = city.ID   # 以where設定結合條件
+  
+  □ 指定表格名稱
+  
+    - 若查詢的欄位在不同表格中欄位名稱相同，則需要在欄位名稱前加上表格名稱
+    
+  □ 表格別名
+  
+    - 為表格取別名，精簡查詢語句
+    
+      select a.name , a.Population coPop,
+             b.Name, b.Population ciPop,
+             b.Population / a. Population * 100
+      from country a, city b
+      where Capital = ID
+  
+  □ 使用「INNER JOIN」(on/using)
+  
+    - 除了用上述where達到結合兩個表格外，亦可用「INNER JOIN」
+      
+      select Code, Capital, city.Name
+      from country inner join city on Capital = ID
+  
+      select Code, Capital, city.Name
+      from country inner join city using(ID)  #  若要結合的欄位名稱相同，則可用using精簡
+  
+■ Outer Join
+
+  若使用Inner Join可能使得部分資料沒有被納入，因為必須符合結合條件的資料才會被納入。
+
+  □ LEFT OUTER JOIN(以左邊表格為主，左邊表格的資料全數納入)
+  
+    select Code, Capital, city.Name
+    from country left outer join city on Capital = ID
+  
+  □ RIGHT OUTER JOIN(以右邊表格為主，右邊表格的資料全數納入)
+  
+    select Code, Capital, city.Name
+    from country right outer join city on Capital = ID
+  
+■ 合併查詢
+  
+  將不同查詢結果合併，每個查詢回傳的欄位數量須相同
+  
+  select a.name, b.ename
+  from city a, emp b
+  union
+  select c.name, d.ename
+  from country c, TP.emp d 
+  
+參考來源：MySQL 超新手入門（5）JOIN 與 UNION 查詢
+http://www.codedata.com.tw/database/mysql-tutorial-5-join-union/
