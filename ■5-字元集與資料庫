@@ -1,0 +1,72 @@
+■  Character Set與Collation
+
+  - 電腦在處理文字資料大多是使用一個「編碼」來表示某一個字，對MySQL資料庫來說，為了要處理不同語言的文字，它使用一套編碼來處理一種語言的文字，
+    稱為「字元集、character set」。以英文字母來說，每一個字母都有一個編碼，例如A=65、B=66、C=67。
+  
+  - Collation指的是在一個字元集中，所有字元的大小排序規則。
+
+  □ Character Set
+  
+    SHOW CHARACTER SET  # 查看MySQL資料庫支援的字元集資訊
+    
+  □ COLLATION
+  
+    SHOW COLLATION  # MySQL除了支援各種不同的字元集，讓資料庫可以儲存不同語言的文字外，每一種字元集都可以依照實際需要，搭配不同的Collation設定。
+    
+    SHOW COLLATION like "latin1%"  # 查詢某一種字元集支援的collation資訊
+    
+    可從collation名稱分辨排序的準則：
+    
+    1. latin_bin            # 處理的單位是byte
+    2. latin_general_ci     # ci表示為case-insensitive，不分大小寫
+    3. latin_general_cs     # ci表示為case-sensitive，區分大小寫
+     
+■  資料庫    
+    
+  - 每一個MySQL資料庫伺服器軟體都會使用一個儲存資料的資料夾，稱為「data directory」。在這個資料夾下，每建立一個資料庫，MySQL都會建立一個資料夾，
+    稱為「資料庫資料夾、database directory」，一個資料庫包含的檔案就會放在各自的資料庫資料夾中。
+    
+  - SHOW VARIABLES LIKE ‘datadir’    # 可以查詢MySQL資料庫伺服器使用的資料庫資料夾。
+  
+  - 因為一個資料庫會是檔案系統中的一個資料夾，所以你要特別留意下列的特性：
+  
+     - 雖然MySQL對資料庫的數量並沒有限制，可是要注意MySQL資料庫伺服器軟體所安裝的作業系統，它對於資料夾與檔案大小的限制。
+     - MySQL使用資料庫名稱作為資料庫資料夾的名稱，要特別注意大小寫的問題。在資料夾名稱不分大小寫的作業系統(例如Windows)，
+       資料庫名稱「MyDB」和「mydb」是一樣的；可是在資料夾名稱會區分大小寫的作業系統(例如Linux)，資料庫名稱「MyDB」和「mydb」就不一樣了。
+     - 每一個資料庫資料夾中都有一個特別的檔案，檔案名稱是「db.opt」，這個檔案的內容是資料庫的字元集與collation設定。
+     - MySQL把「DATABASE」與「SCHEMA」當成是一樣的，所有後續使用的指令，都可以把「DATABASE」換成「SCHEMA」。
+    
+  □ 建立資料庫(CREATER)      
+    
+    create database if not exists mydb # 創造一個資料庫，若已存在只會顯示警告訊息，非錯誤訊息
+    
+    create database mydb character set utf8 collate utf8_unicode_ci  # 自己設定字元集及collation
+    
+  - 如果沒有修改過MySQL設定的話，預設的字元集是「latin1」，Collation是「latin1_swedish_ci」。  
+    
+  □ 修改資料庫(ALTER)    
+  
+  - 建立資料庫以後，你唯一能執行的修改是資料庫預設的字元集與collation。
+  - 修改資料庫的字元集是或Collation，並不會影響原來已經存在的表格。
+    
+    alter database mydb character set utf8 collate utf8_unicode_ci
+   
+  □ 刪除資料庫(DROP)     
+   
+  - 執行刪除資料庫敘述，MySQL會直接刪除，並不會再次確認，將刪除資料庫中所有資料，且非可逆。
+    
+    drop database if exists mydb   # 刪除一個資料庫，若無該資料庫存在只會顯示警告訊息，非錯誤訊息
+   
+  □ 取得資料庫資訊(SHOW)
+  
+    show databases(schemas)     # 跟資料庫相關的資訊
+    
+    show create database world  # 取得建立資料庫的敘述
+    
+  - MySQL資料庫伺服器有一個很重要的資料庫-「information_schema」，通常稱為「系統資料庫」，資料庫中儲存伺服器所有重要的資訊。
+    跟資料庫相關的資訊儲存在「SCHEMATA」表格中  
+    
+    select * from information_schema.SCHEMATA
+   
+參考來源：MySQL 超新手入門（7）字元集與資料庫
+http://www.codedata.com.tw/database/mysql-tutorial-7-charset-database/
