@@ -41,30 +41,92 @@
   
 ■ 欄位資料型態
 
+  □ 數值
   
+  - 若在儲存整數型態的欄位中儲存小數，MySQL會自動四捨五入到整數，而不會出錯。
+  -「FLOAT」和「DOUBLE」以近似值儲存小數；「DECIMAL」以完全精準數值儲存小數，但佔用空間較大。
+  -「FLOAT」、「DOUBLE」和「DECIMAL」都可以依照需要設定長度(所有數字的個數)與小數位數(小數點後可幾位)。
+    當長度與小數位數一樣的時候，表示只可以儲存小數，例如「0.123」。
+  - 「ZEROFILL」的設定表示在查詢這些欄位的時候，回傳的資料會在左側根據長度的設定填滿「0」。
   
+  □ 位元
   
+  - 可以二進位來儲存數值，使用b'加上0或1'。
   
+    insert into bittable
+    values(1, 255, 65536),
+	        (b'1', b'1111111', b'111111111111')
+          
+  □ 字串
   
+  - MySQL把字串型態分為兩大類：
   
+    1. 「非二進位制、non-binary」儲存一般文字的字串，會有特定的字元集與collation。
+    2. 「二進位制、binary」使用位元組儲存資料，不包含字元集與collation，所以大多用來儲存圖片或音樂這類資料。
   
+  - 固定長度與變動長度的兩種字串型態都可以儲存字串，差異在儲存的文字個數小於型態指定的長度時，變動長度實際儲存的空間會小一些。
+  - 「LENGTH」可查看資料實際儲存長度(byte)；「CHAR_LENGTH」則查看字元數量。
+  - 字元集會影響字串的儲存空間，collation會影響字串排列順序。
   
+  □ 列舉與集合  
   
+  - 列舉(ENUM)與集合(SET)是一種特殊的「非二進位制、non-binary」字串型態，所以它們也可以指定字元集與collation。
+  - 列舉可設定一組合法的字串，須符合設定的字串才可新增。
   
+    insert into settable
+    values ("XS"), ("S"), ("M"),("L"), ("XL")   # 列舉為儲存單一資料成員
   
+    insert into enumtable(stringsize) values ("QQ")
+
+    insert into enumtable(enumsize) values ("QQ")   # 將警告訊息，除了規定的內容外不可儲存其他內容
   
+    insert into enumtable(enumsize) values (1),(2),(3),(4),(5)  # 可以用數字編號來指原字串
+   
+  - 指定列舉型態欄位為排序欄位的時候，資料庫會使用編號來排序，而不是以成員的字串值。
   
+    select enumsize from enumtable order by enumsize  # 依照實際儲存的數字排序
   
+    select stringsize from enumtable order by stringsize  # 依照實際儲存的數字排序
+    
+  - 集合型態欄位可儲存多組成員資料。
+    
+    insert into settable
+    values ("MON", "WED", "FRI"),
+	         ("TUE", "THU"),
+           ("SUN", "SAT")
+    
+  - 集合型態欄位與列舉型態欄位同樣具有檢查資料是否正確的能力。
   
+    insert into settable values ("MON, HELLO, FRI")
   
+  - 集合型態欄位同樣也可用數字編號代指，但集合的數字編號為2的幾次方(2的0、2的1、2的2...)。
   
+    insert into settable values (21)  # 一次表示多個成員時，可將其數值相加
+    
+  - 列舉與集合型態都可以設定需要的字元集與collation。
   
+  □ 日期與時間
   
+  - MySQL的時間型態欄位可以儲存類似「經過的時間」這樣的資料。
   
+    insert into dttable (t) values ("200;30;30")     # 200小時30分鐘又30秒之後
+
+    insert into dttable (t) values ("-1;20;30")      # 1小時20分鐘又30秒之前
+    
+  - 如果只需要儲存年份資料的話，你可以使用西元年(YEAR)型態，可以視需要把西元年型態設定為兩位或四位數字，
+    四位數字可以儲存的範圍從「1901」到「2155」；兩位數字的範圍從「00」到「99」，實際的西元年份是「1970」到「2069」。
   
+    insert into dttable (y4) values ("2000"), (2000)   # 輸出2000
+    insert into dttable (y4) values ("200"), (200)     # 輸出錯誤
+    insert into dttable (y4) values ("20"), (20)       # 輸出2020 
+    insert into dttable (y4) values ("2"), (2)         # 輸出2002 
   
+  - 「TIMESTAMP」型態的格式與「DATETIME」一樣，不過它使用的儲存空間只有4bytes，是「DATETIME」型態的一半。
+    為儲存從「1970-01-01 00:00:00」到目前經過的秒數，與「Greenwich Mean Time、GMT」格林威治標準時間是一樣的。
   
+  - 設定為其他時區
   
-  
-  
-  
+    set GLOBAL TIME_ZONE = "+08:00"
+    
+ 資料來源：MySQL 超新手入門（8）儲存引擎與資料型態
+ http://www.codedata.com.tw/database/mysql-tutorial-8-storage-engine-datatype/
