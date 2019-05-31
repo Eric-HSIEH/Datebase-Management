@@ -1,0 +1,246 @@
+■ 建立表格(CREATE TABLE)
+
+  create table IF NOT EXISTS city(                   # 用IF NOT EXISTS 防止表格已存在的錯誤防
+	  ID int(11) not null default "",
+    CountryCode char(3) not null default "",
+    District char(20) not null default "",
+    Population int(11) not null default "0",
+    primary key (ID)
+  ) auto_increment = 4080 default charset = latin1   # 此行為設定表格的屬性
+
+  □ 表格屬性
+  
+    create table addresbook(
+	    name varchar(20),
+      tel varchar(20),
+      address varchar(80),
+      birthday date
+    ) engine = InnoDB                 # 設定儲存引擎，或用TYPE
+      character set = utf8            # 設定字元集，或用CHARSET  
+      collate = utf8_unicode_ci       # 設定collation
+      
+  - SHOW ENGINES # 查詢支援的儲存引擎
+  
+  - 修改儲存引擎1-修改設定檔：MySQL資料庫伺服器在啟動時會讀取一個名稱為「my.ini」的設定檔，檔案中有許多啟動資料庫伺服器時需要的資訊。
+    其中就包含預設的儲存引擎設定，你可以修改這個設定後再重新啟動資料庫伺服器，讓新的設定生效：
+    
+    default_storageengine=InnoDB  # 可修改為想要的預設儲存引擎
+    
+  - 修改儲存引擎2-修改的敘述：
+  
+    set global storage-engine = 儲存引擎   # 執行後所有連到伺服器的用戶端都使用此儲存引擎，伺服器重新啟動就失效
+    
+    set session storage-engine = 儲存引擎  # 執行後只有用戶端使用該儲存引擎，離線後就失效
+    set stroage-engine = 儲存引擎          # 執行後只有用戶端使用該儲存引擎，離線後就失效 
+      
+  □ 字串欄位屬性 
+  
+    create table addresbook(
+      name varchar(20) charset big5,   # 指定name欄位的字元集
+      tel varchar(20),                 # 若沒指定則套用預設
+      address varchar(80),
+      birthday date
+    ) engine = InnoDB
+      character set = utf8
+
+  □ 數值欄位屬性
+  
+   - 數值型態欄位專用的屬性設定有「UNSIGNED」、「ZEROFILL」與「AUTO_INCREMENT」。
+     
+     「UNSIGNED」：不能儲存負數。
+     「ZEROFILL」：在左側根據長度的設定填滿0。
+     「AUTO_INCREMENT」：設定為自動累計欄位，DECIMAL和NUMERIC不適用，其他皆可。
+      
+  □ 通用欄位屬性           
+
+   「NOT NULL」：不能儲存NULL值。
+   「DEFAULT」：可以設定欄位的預設值，只能是「一個明確的值」。
+   
+  - 預設值的設定要注意下列的規則：
+  
+    - 「BLOB」與「TEXT」欄位型態不可以使用[DEFAULT]關鍵字。
+    - 不能與其它的欄位設定造成衝突。例如一個設定為「NOT NULL」的欄位，卻使用「DEFAULT NULL」設定預設值為「NULL」。
+    - 指定的預設值要符合欄位型態。例如「DATE」型態欄位使用「DEFAULT ‘Hello!’」指定預設值。
+            
+  □ TIMESTAMP欄位型態與預設值
+  
+    create table tstable(
+	    ts timestamp not null default current_timestamp on update current_timestamp,  # 「DEFAULT CURRENT_TIMESTAMP」設定預設值為目前的日期時間
+                                                                                       「ON UPDATE」可以指定在修改紀錄的時候，MySQL自動幫你填入的資料
+      ts2 timestamp not null default "0000-00-00 00:00:00",
+      area varchar(20) not null,
+      temp int(11) not null
+    ) 
+      
+  - 「TIMESTAMP」欄位型態很適合用來記錄資料新增或修改的日期與時間。   
+      
+     create table tstable2(
+        created timestamp default 0,                      # 以0代替current_timestamp，因MySQL限制只能有一個current_timestamp
+        updated timestamp on update current_timestamp,
+        area varchar(20) not null,
+        temp int not null
+     )  
+
+  □ 使用其它表格建立一個新表格
+  
+      create table cityTWN(
+        Name varchar(30),
+          Population INT unsigned,
+          Description varchar(50))   #  外加額外的欄位
+      select Name, Population        # 以查詢的結果建立表格
+      from world.city  
+      where CountryCode = "TWN"
+      
+    - 若只是要借用已存在表格的欄位定義，而不需要資料時
+    
+      create table table1   # 包含索引與「AUTO_INCREMENT」設定都會套用在新表格
+      {like table2 }
+      
+  □ 建立暫存表格
+  
+    create temporary table table1  # 可加上temporary來建立暫存表格
+    
+  - 「TEMPORARY」表格有下列重點：
+  
+    - 暫存表格是每一個用戶端專屬的表格，用戶端離線後會自動刪除
+    - 因為是專屬的表格，所以不同用戶端建立相同名稱的表格也沒關係
+    - 暫存表格的名稱可和資料庫的表格名稱相同，不過會暫時隱藏資料庫的表格
+    - 可用alter table修改暫存表格名稱，但不能用rename table修改
+      
+■ 修改表格(ALTER TABLE)      
+      
+   □ 增加欄位
+   
+    alter table mytable add newcolumn int              # 沒有設定的話，新欄位會在最後面
+
+    alter table mytable add newcolumn int first        # first設定為新增欄位在第一個
+
+    alter table mytable add newcolumn int after two    # after two設定為新欄位在原本第二個欄位的後面
+    
+    alter table mytable add (newcolumn1 int, newcolumn2 int)  # 一次新增多個欄位
+
+   □ 修改欄位(CHANGE、MODIFY)      
+   
+    - CHANGE可以修改欄位的名稱與定義。
+    - MODIFY只能修改欄位的定義，不能修改欄位名稱。
+      
+     alter table mytable change one changecolumn bigint after two    # 將one欄位名稱改成changecolumn，並將欄位型態改成bigint，並放在第三個位置      
+     alter table mytable modify one bigint after two    # 將one欄位型態改成bigint，並放在第三個位置      
+      
+   □ 刪除欄位(DROP)
+   
+     alter table mytable drop column two   # 刪除two欄位
+      
+   □ 修改表格名稱(ALTER TABLE、RENAME TABLE)
+      
+     alter table mytable rename newtable   # 改表格名稱第一種方法
+
+     rename table mytable to newtable      # 改表格名稱第二種方法
+      
+■ 刪除表格(DROP TABLE)          
+    
+    drop table mytable
+      
+■ 索引介紹
+
+ - 除了好好規劃與建立資料庫與表格外，你還可以利用「索引、index」預防你的資料出現問題，尤其是表格儲存非常大量的紀錄時，建立適當的索引，
+   可以增加查詢與維護資料的效率。
+   
+ - 當執行查詢時，資料庫會從頭到尾邊讀取邊判斷是否有符合條件的資料，可為表格建立索引來改善沒效率的搜尋方式。
+ 
+ - 索引分為主索引鍵(primary key)、唯一索引(unique index)與非唯一索引(non-unique index)三種。
+ 
+  1. 主索引鍵(primary key)
+     一個表格通常會有一個，而且只能有一個。設定為主索引鍵的欄位值不可以重複，而且不可以儲存「NULL」值。
+     
+  2. 唯一索引(unique index)     
+     也稱為「不可重複索引」，在一個表格中，設定為唯一索引的欄位值不可以重複，但是可以儲存「NULL」值。
+     
+  3. 非唯一索引(non-unique index)     
+     欄位值可以重複，也可以儲存「NULL」值。
+
+■ 建立索引
+
+   □ 在建立表格的時候建立索引
+   
+     # 第一種方法 
+     
+      create table addressbook(
+        id    int unsigned primary key,   #  設定主索引鍵
+          name  varchar(20),
+          email varchar(36) unique key    # 設定唯一索引
+      )
+      
+     # 第二種方法 
+     
+      create table addressbook(
+        id    int unsigned,
+        name  varchar(20),
+        tel   varchar(20),
+        email varchar(36),
+        primary key(id),
+        unique key (email)
+        index(name, tel)      # 設定一般索引
+      )
+
+  - 只想要為一個字串型態欄位的部份資料建立索引，或是指定建立的索引資料，是要依照由小到大，還是由大到小排列。
+  
+      create table addressbook(
+        id    int unsigned,
+          name  varchar(20),
+          email varchar(36),
+          primary key(id),
+          unique key (email),
+          index (address (5) DESC)    # 只有使用address欄位前5個字元製作索引，且遞減排序
+      )     
+
+  - 只有「CHAR」、「VARCHAR」、「BINARY」與「VARBINARY」型態的欄位可以指定製作索引的長度。「ASC」或「DESC」可以使用在任何型態的欄位。
+  - 如果一個表格使用的儲存引擎是「MEMORY」的話，建立索引的時候還可以額外指定索引使用的「演算法、algorithm」。
+  
+     - 預設的「HASH」演算法適合用在主索引鍵和唯一索引，這種演算法在搜尋不能重複的資料時，效率會比較好；
+       而「BTREE」演算法適合用在可以允許重複資料的一般索引，在搜尋上會比「HASH」有更好的效率。
+
+   □ 在修改表格的時候建立索引
+   
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
