@@ -202,30 +202,67 @@
 
    □ 在修改表格的時候建立索引
    
+     alter table book
+     add unique index address(5)    # 一個「ALTER TABLE」敘述只能建立一個索引
+
+   □ 使用「CREATE INDEX」建立索引
+
+     alter table addessbook
+     add primary key (id)              # 主索引還是要用alter table來建立
+     create unique index email_index   # 唯一跟一般索引可以用create index來建立
+     on addressbook (email)     
+
+■ 索引的名稱
+
+  - 在「CREATE TABLE」或是「ALTER TABLE」敘述中建立索引的話，你可以為建立的索引取一個名稱。
+  - 使用「CREATE INDEX」建立索引的時候，就一定要指定一個索引名稱。
+  - 如果使用上列的語法建立索引時沒有指定索引名稱，MySQL會幫你取一個，索引的名稱就是欄位名稱，如果是多個欄位的索引，
+    就會使用第一個欄位當作索引名稱。
+
+■ 刪除索引
+
+ - 第一種方法
+ 
+    alter table addessbook
+    drop primary key,
+    drop index email,
+    drop index name,
+    drop index address
+
+- 第二種方法，只能一次刪一個索引
+
+    drop index "primary" on addressbook
+    drop index email on addressbook
+
+■ 數值欄位型態與AUTO_INCREMENT
+
+  - 若有「編流水號」的需求，可以選擇整數型態的欄位後，再使用「AUTO_INCREMENT」欄位屬性。
+
+	create table meeting(
+	  id int unsigned not null auto_increment,
+	  title varchar(36),
+	  primary key(id)
+	  )
+
+  - 接著要新增參加這次開會的員工資料到「participate」表格時，你需要用到MySQL剛才會為你在「meeting」表格中自動編製的流水號，
+    這樣的需求可以使用「LAST_INSERT_ID()」函式來取得
     
+	insert into participate (id, empno)
+	values (last_insert_id(), 7499),
+	       (last_insert_id(), 7521),
+	       (last_insert_id(), 7654)
 
+  - 新增資料時，要讓MySQL為你自動編製一個流水號，並儲存到紀錄中的方式有下列幾種。
+  
+	insert into meeting (id, title)
+	values(0, "manger meeting")
 
+	insert into meeting (id, title)
+	values(null, "clerk meeting")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-      
+  - 如果你需要編製的流水號範圍是非常大的，你應該選擇「AUTO_INCREMENT」欄位的型態為「BIGINT」；MySQL另外提供一個「SERIAL」關鍵字。
+  
+  	
       
       
       
