@@ -1,0 +1,143 @@
+■ 子查詢
+
+  □ 一個敘述中的查詢敘述
+  
+      select Code, Population
+      from country
+      where Population > (select Population
+                          from country
+                          where Code = "USA")    
+  
+■ WHERE、HAVING子句與子查詢
+
+  □ 比較運算子
+  
+    select Name, GNP
+    from country
+    where GNP = (select max(GNP)   # 子查詢回傳的欄位不能超過一個欄位資料或多筆資料
+                  from country)      
+
+  □ 「IN」運算子
+  
+    select Name
+    from country
+    where Code in (select CountryCode           # 可搭配not變成Code not in 
+                   from city
+                   where Population > 9000000)  
+  
+  □ 其它運算子
+  
+    - all可以看作and，如下為當n = 2 and n = 3
+
+      select *
+      from outertable
+      where n = all (select n                # = 也可用 > < <>  >= <= 
+                     from innertable)  
+
+    - any可以看作or，如下為當n = 2 or n = 3
+
+      select *
+      from outertable
+      where n = any (select n                # = 也可用 > < <>  >= <= 
+                     from innertable)    
+  
+    - = any同於in
+    - <> all同於not in
+  
+  □ 多欄位子查詢
+  
+    - 以下等同where Continent = "Asia" and GovernmentForm = "Republic"
+  
+      select Name, GNP
+      from country
+      where ( Continent, GovernmentForm ) = ( "Asia", "Republic" )    
+  
+  - 以下為查詢地區與Iraq相同，以及政府型態與Iraq相同
+  
+      select Name
+      from country
+      where ( Region, GovernmentForm ) = ( select Region,  GovernmentForm
+                                           from country
+                                           where Name = "Iraq")  
+  
+  - 以下為查詢各洲GNP最高的國家，子查詢傳回多筆紀錄時就要使用「IN」運算子
+  
+      select Continent, Name, GNP
+      from country
+      where ( Continent, GNP ) in ( select Continent,  Max(GNP)
+                                    from country
+                                    group by Continent)  
+  
+■ SELECT子句與子查詢
+
+- 查詢「國家Japan的GNP」
+    select concat("The GNP of JAPAN is ",
+		    	       (select GNP from country where Name = "Japan"))  
+  
+- India國家佔全世界人口的比例
+
+    select (select Population from country where Name = "India") /
+           (select sum(Population) from country)  
+  
+■ FROM子句與子查詢  
+
+- 查詢「亞洲GNP前十名國家」
+
+    select Name, GNP
+    from (select * from country where Continent = "Asia") asiacountry  # 一定要取子查詢表格的別名
+    order by GNP DESC
+    limit 10  
+  
+- 查詢「國家的官方語言與人口比例」
+
+    select Name, Language, Population * Percentage
+    from country, (select CountryCode, Language, Percentage
+             from countrylanguage
+                   where IsOfficial = "T" ) officallanguage
+    where Code = CountryCode
+    
+■ 資料維護與子查詢
+
+   □ 新增
+   
+      insert into mycountry      # insert into亦可用replace
+      ( select Code, Name, Continent, Region, Population, GNP
+        from country
+        where Continent = "Asia")    
+  
+   □ 修改
+   
+      update cmdev.emp                # 修改的表格不能跟子查詢的表格相同
+      set salary = salary * 1.05
+      where deptno = ( select deptno
+                       from cmdev.dept
+                       where dname = "SALES")    
+   □ 刪除
+   
+      delete from cmdev.emp           # 刪除的表格不能跟子查詢的表格相同
+      where deptno = (select deptno
+                      from cmdev.dept
+                      where dname = "SALES")    
+  
+■ 關聯子查詢
+
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
