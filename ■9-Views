@@ -1,0 +1,116 @@
+■ View的應用
+
+  - 若有很常執行的SQL敘述，可建立一個「view」元件，用以保存查詢敘述。
+  
+    create view CountryView as
+    select Continent, Region, Code, Code2, Name
+    from country
+    order by Continent, Region, Code
+    
+    select * from CountryView  # 查詢建立的view(類似表格)
+    
+■ 建立需要的View【create view】
+
+  - 如果需要修改已經建立好的view元件，須加上「OR REPLACE」
+  
+  create or replace view CountryMaxGNP as      # 使用or replace新增新的Code欄位
+  select Code, Name, GNP                               
+  where (Region, GNP) in ( select Region, MAX(GNP)
+                           from country
+                           group by Rgegion)  
+
+  desc CountryMaxGNP    # 查詢view資訊
+  
+  - view元件的限制與規定
+  
+    1. 同一資料庫中view名稱不能重複，也不能和表格名稱相同
+    2. view不能和triggers建立連結
+    
+  - 儲存在view元件的查詢敘述也有下列規定
+  
+    1. 查詢敘述只能用存在的表格或view
+    2. from子句中不能用子查詢
+    3. 不能使用temporary表格
+    4. 不能使用自定義的變數、Proceduce與Prepared statement參數
+    
+■ 修改View【alter view、create or replace view】
+
+    alter view CountryMaxGNP as        # alter view也可用create or replace view(用此敘述當view原本不存在時會建立新的)
+    select Continent, Code, Name, GNP
+    from country
+    where (Region, GNP) IN ( select Region, MAX(GNP)
+                             from country
+                             group by Region)  
+    
+■ 刪除View【drop view】    
+    
+   drop if exist view CountryMaxGNP 
+    
+■ 資料維護與View
+
+  - View元件除了提供比較方便的查詢方式外，你也可以使用View元件來執行資料維護的工作。
+  - 要使用View元件來執行新增、修改或刪除的工作，view包含的查詢規則如下：
+  
+    1. 不可以包含計算或函式的欄位
+    2. 只允許一對一的結合查詢
+    3. View元件的「ALGORITHM」不可以設定為「TEMPTABLE」
+    
+ □ 使用View元件執行資料維護
+ 
+   # 建立一個view
+   
+          create view cmdev.EmpDept30View as
+    select empno, ename, job, manger, hiredate, salary, comm
+    from cmdev.emp
+    where deptno = 30
+   # 執行完下列敘述後，無論查詢view或表格，都可以發現資料已更新 
+    update EmpDept30View
+    set comm = 600
+    where empno = 7844   
+    
+   # 執行下列後，只有表格會更新，因為新增的資料沒有部門編號，而view則是回傳部門編號為30的資料 
+    insert into EmpDept30View
+    values(9001, "SIMON", "sales", 7698, "2000-04-01", 1000, 250)    
+    
+   # 由於view本身回傳的資料就沒有標號9001的資料，所以並不會將其刪除
+    delete from EmpDept30View where empno = 9001   
+    
+ □ 使用「WITH CHECK OPTION」
+ 
+   # 使用create or replace view...with check option 來檢查查詢是否符合規定
+    create or replace view cmdev.EmpDept30View as
+    select empno, ename, job, manger, hiredate, salary, comm
+    from cmdev.emp
+    where deptno = 30
+    with check option
+ 
+ # 加上locla表示檢查範圍只限於目前的view(即cmdev.EmpDept20View)，若使用預設的CASCADE，則會檢查範圍內所有view(即EmpDept20View、cmdev.EmpSlaryView)
+    create or replace view cmdev.EmpDept20View as
+    select * from cmdev.EmpSlaryView
+    where deptno = 20
+    with local check option 
+ 
+■ View的演算法
+ 
+ - 一般不用特別指定view的演算法是MERGE或TEMPTABLE，會自動選擇適合的演算法。
+
+    create algorithm = merge view cmdev.EmpSalaryView as   # MERGE
+    select * from cmdev.emp where salary >= 1500
+
+    create algorithm = temptable view cmdev.EmpSalaryView as   # TEMPTABLE
+    select * from cmdev.emp where salary >= 1500
+ 
+■ View的維護與資訊
+
+  □ 檢驗View的正確性
+  
+    check table EmpDept20View
+
+  □ 取得View的相關資訊
+  
+    select table_schema, table_name, view_definition,
+           check_option, is_updatable
+    from information_schema.views    
+ 
+參考來源：MySQL 超新手入門（12）Prepared Statement
+http://www.codedata.com.tw/database/mysql-tutorial-11-views/
