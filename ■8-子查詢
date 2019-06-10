@@ -28,19 +28,16 @@
   □ 其它運算子
 
       select *
-      from outertable                        # all可以看作and，如下為當n = 2 and n = 3
+      from outertable                        # all可以看作and，如此處當n = 2 and n = 3
       where n = all (select n                # = 也可用 > < <>  >= <= 
                      from innertable)  
-
-    - any可以看作or，如下為當n = 2 or n = 3
-    
+   
       select *
-      from outertable			
+      from outertable			     #  any可以看作or，如此處當n = 2 or n = 3
       where n = any (select n                # = 也可用 > < <>  >= <= 
                      from innertable)    
   
-    - = any同於in
-    - <> all同於not in
+    -   = any同於in ； <> all同於not in
   
   □ 多欄位子查詢
   
@@ -147,40 +144,17 @@
   
 ■ 子查詢與結合查詢
   
-  - 結合查詢
+  - 結合查詢可簡化語法
   
-	select Name
+	select Name           # 原始語法
 	from city
 	where ID in ( select Capital
 		      from country
 		where Capital is not null )  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+   
+	select city.Name      # 結合查詢
+	from city, country
+	where ID = Capital  
+	
+參考來源：MySQL 超新手入門（10）子查詢
+http://www.codedata.com.tw/database/mysql-tutorial-9-subquery/
