@@ -26,18 +26,16 @@
                    where Population > 9000000)  
   
   □ 其它運算子
-  
-    - all可以看作and，如下為當n = 2 and n = 3
 
       select *
-      from outertable
+      from outertable                        # all可以看作and，如下為當n = 2 and n = 3
       where n = all (select n                # = 也可用 > < <>  >= <= 
                      from innertable)  
 
     - any可以看作or，如下為當n = 2 or n = 3
-
+    
       select *
-      from outertable
+      from outertable			
       where n = any (select n                # = 也可用 > < <>  >= <= 
                      from innertable)    
   
@@ -121,7 +119,52 @@
   
 ■ 關聯子查詢
 
+- 當使用子查詢時，若使用到外層查詢的資料來執行判斷的話，稱為「關聯子查詢」。
 
+	select Continent, Name, GNP
+	from country oc
+	where GNP = ( select max(GNP)
+		      from country
+		      where Continent = oc.Continent )   
+		      
+- EXIST當子查詢有任何資料回傳時，條件即成立。  
+  
+	select Name
+	from country c
+	where exists ( select *
+		       from city
+		       where CountryCode = c.Code and
+		       Population > 8000000 )  
+  
+- EXIST與NOT一起使用時，表示回傳條件下不存在的資料。   
+  
+	select Name
+	from country c
+	where not exists ( select *
+		           from city
+		           where CountryCode = c.Code and
+		           Population > 8000000 )    
+  
+■ 子查詢與結合查詢
+  
+  - 結合查詢
+  
+	select Name
+	from city
+	where ID in ( select Capital
+		      from country
+		where Capital is not null )  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
