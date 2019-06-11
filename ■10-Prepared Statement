@@ -1,0 +1,45 @@
+■ 使用者變數
+
+    set @my_continent = "Asia", @my_continent2 = "USA"
+    select @my_continent, @my_continent2
+    
+    set @my_gnp := 30000, @my_gnp2 := 30000000  # 可以「:=設定初值 」
+
+    select Continent, Name, GNP, Population
+    from country
+    where Continent in (@my_continent, @my_continent2)   # 可以使用在一般敘述中
+     
+    select @my_gnp := max(GNP), @my_p := max(Population)  # 將查詢回傳的值儲存在變數中
+    from country    
+
+■ Prepared Statements的應用
+
+  - 若有許多要執行的敘述，可是內容相似，可以用Prepared Statements改善資料庫效率
+  
+    prepare my_country from                  # 事先準備好敘述模型
+    "select Code, Name, GNP from country
+    where Code = ?"    
+
+    set @my_code = "USA";                    # 套用
+    execute my_country using @my_code
+
+    set @my_code = "TWN";                    # 套用
+    execute my_country using @my_code
+    
+    deallocate prepare my_country            # 刪除prepared statement
+
+■ Prepared Statements的參數
+
+    prepare new_dept from
+    "insert into cmdev.dept values (?, ?, ?)";
+
+    set @my_deptno = 99, @my_dname = "boss", @my_location = "TAIPEI";  
+    execute new_dept using @my_deptno, @my_dname, @my_location           # 傳送的參數個數要符合prepared statement所設定的數量
+    execute new_dept using @my_deptno, @my_dname, @my_salary             # 若個數相同，但變數不同，則不會出錯，但不同的變數會變成null 
+
+■ 有效範圍
+
+  - 所有使用者變數與prepared statements都是某一個用戶端專屬，若離線則會被清除，所以不能指定為某個資料庫。  
+
+參考來源：MySQL 超新手入門（12）Prepared Statement
+http://www.codedata.com.tw/database/mysql-tutorial-12-prepared-statement/
