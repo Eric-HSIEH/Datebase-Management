@@ -1,0 +1,140 @@
+■ Stored Routines的應用
+    
+  □ Stored Procedures介紹
+  
+    - 若有一組很常執行的敘述，則可以儲存成「Stored procedure」元件。
+  
+      delimiter //    # 將MySQL的執行符號從分號(;)轉換為兩個斜線(//)，為了在創建的過程中，不被mysql用戶端誤判，而將未完成儲存步驟送到伺服器端
+      create procedure test(in a int, out b int, inout c int)
+      begin
+      set a = 1;       #以下為要執行的程式碼
+      set c = c * 2;
+      end//    
+
+      drop procedure if exists test  # 刪除stored procedures
+
+  □ Stored Functions介紹
+
+    - 如果MySQL提供的函式無法完成工作，或想要改善比較複雜的敘述，可以建立Sotred functions元件。
+    - 建立好的Stored procedures元件要使用「CALL」來呼叫
+
+      create function hello(s char(20))
+      returns char(50) deterministic
+      return concat("HELLO, ", s, "!")    # 要執行的程式碼
+
+      drop function hello   # 刪除Stored Functions
+
+■ 在MySQL Workbench中管理Stored routines
+
+  □ SQL Script、DELIMITER與Stored routines
+  
+      - SQL script是一個包含許多SQL敘述的檔案，你可以把想要執行的SQL敘述都集中在一個檔案中。
+      - 以建立課程範例資料庫的「cmdev.sql」檔案來說，它的內容會像這樣：
+
+          -- MySQL DB Development Certification Guide    # 使用--表示該行為註解
+          -- Datebase : cmdev
+
+          set character_set_client="big5";
+          set character_set_connection="big5";
+          set character_set_result="big5";
+
+          drop database if exists cmdev;
+
+          create database cmdev character set big5;
+
+          use cmdev;
+
+      - 更改結尾符號：
+
+          delimiter $$       # 以delimiter設定新的結尾符號
+
+          set character_set_client="big5"$$
+          set character_set_connection="big5"$$
+          set character_set_result="big5"$$
+
+          drop database if exists cmdev$$
+
+          create database cmdev character set big5$$
+
+          use cmdev$$
+
+          delimiter ;      # 通常在最後會回復預設設定
+
+          delimiter $$
+
+      - stored procedures以begin...end包含多個要執行的敘述：
+
+          create procedure my_world_count()
+          begin
+            select count(*) countrycount from country;
+            select count(*) languagecount from countrylanguage;
+            select count(*) citycount from city;
+          end $$
+
+          delimiter ;
+
+      - stored functions以begin...end包含多個要執行的敘述：
+
+          delimiter $$
+
+          create function my_date2()
+          returns varchar(64)
+          begin
+            declare d, t, w varchar(24);
+
+              set d = date_format(curdate(), "%Y/%m/%d");
+              set t = time_format(curtime(), "%h/%i/%s");
+              set w = dayname(curdate());
+
+              return concat(d, " ", t, " ", w);
+          end $$
+
+          delimiter ;
+
+■ Stored Routines的參數
+
+  □ Stored Functions的參數
+
+    - functions必須決定每一個參數的名稱和型態，再依照想要的順序定義。
+    
+      CREATE FUNCTION my_summary(p_num int, p_num2 int)    # 需要兩個INT型態的整數參數
+      returns int  
+      begin
+        return p_num + p_num2;
+      end
+
+      select my_summary(3,5)  # 呼叫函式，參數數量、型態要與預設相同
+
+  □ Stored Procedures的參數
+  
+    - 參數用途：
+        
+      - IN：「輸入、input」用的參數。這種參數與functions中的參數完全一樣，在呼叫procedures時傳送資料給procedures用的。
+      - OUT：「輸出、output」用的參數。在呼叫procedures時，不能接收傳送的資料，不過在執行procedures時，可以設定這類參數。的值，新的值在執行完成後，可以回傳給呼叫的地方使用
+      - INOUT：「輸入與輸出、input與output」用的參數。同時具有「IN」與「OUT」兩種用途。
+
+        delimiter //
+        create procedure test2(in pi int, out po int, inout pio int)
+        begin
+          select pi, po, pio;
+            set pi = 99, po = 99, pio = 99;
+        end//
+        delimiter ;
+
+        call test2(1, @my_out, @my_inout)   # out和inout因為執行完成後會回傳資料，使用變數名稱才能接收到procedures回傳的資料
+        select @my_out, @my_inout           # 執行procedures以後，指定給「OUT」與「INOUT」的變數名稱，就會儲存procedures中設定的值`.
+      
+    - 例子：
+      
+        create procedure country_count2(in pi_con varchar(26), out po_count int)
+        begin 
+          select count(*) into po_count   # 把查詢得到的數字指定給po_coint變數
+            from country
+            where Continent = pi_con;
+        end
+
+        call country_count2 ("Asia", @my_count)  # 呼叫函式
+        select @my_count                         # 查詢
+
+參考來源：MySQL 超新手入門（13）Stored Routines 入門
+http://www.codedata.com.tw/database/mysql-tutorial-13-stored-routines/
