@@ -1,0 +1,186 @@
+■ 宣告與使用變數(declare)
+
+  - 如果需要處理比較複雜的資料，可以宣告「區域變數、local variables」。
+  - 在Stored routines中宣告區域變數，一定要放在「BEGIN」與「END」區塊中。
+  - 在「BEGIN」與「END」區塊中宣告的區域變數，只有在宣告的區塊中有效，這也是它稱為區域變數的原因。
+  
+    delimiter //
+    create function test() returns int
+    begin
+      declare v_num, v_num2, v_num3 int;   # 用declare宣告3個int的區域變數
+
+        set v_num = 3, v_num2 = 5;
+        set v_num3 =  v_num + v_num2;
+        return v_num3;
+    end//
+    delimiter ;
+
+■ 判斷
+
+  □ IF
+  
+    delimiter //
+    create function std_weight(h int, g char(1))
+    returns int
+    begin
+      declare standard int default 0;
+
+      if (h between 160 and 164) and (g = "M") then
+        set standard = 58;
+      elseif (h between 160 and 164) and (g = "F") then
+        set standard = 58;
+      elseif (h between 165 and 169) and (g = "M") then
+        set standard = 60;
+      elseif (h between 165 and 169) and (g = "F") then
+        set standard = 56;    
+      else
+        set standard = 10;
+      end if;
+    end//
+    delimiter ;
+
+    call std_weight(101, "M")
+
+  □ CASE
+
+  - 第一種方法
+
+    delimiter //
+    create function std_weight(h int, g char(1))
+    returns int
+    begin
+      declare standard int default 0;
+
+      case
+      when w > standard then
+        select "H";
+      when w < standard then
+        select "J";
+      else
+        select "A";
+      end case;
+    end//
+    delimiter ;
+
+  - 第二種方法
+
+    delimiter //
+    create function get_season(p int)
+    returns varchar(7)
+    begin
+      declare season varchar(7);
+
+      case p
+
+        when 1 then set season = "S";
+        when 2 then set season = "S2";
+        when 3 then set season = "A";
+        when 4 then set season = "W";
+        else set season = "UNKNOWN";
+
+      end case;
+
+        return season;
+    end//
+    delimiter ;
+
+■ 迴圈
+
+  □ WHILE
+  
+    delimiter //
+    create function get_season(p int)
+    returns int
+    begin
+      declare v_count int default 1;    # 遞增用的變數
+      declare v_total int default 0;    # 加總用的變數
+
+      while v_count <= p Do
+        set v_total = v_total + v_count;
+        set v_count = v_count + 1;
+
+        end while;
+
+        return v_total;
+    end//
+    delimiter ;  
+
+  □ REPEAT
+  
+    delimiter //
+    create function s(p int)
+    returns int
+    begin
+      declare v_count int default 1;
+        declare v_total int default 0;
+
+      repeat
+        set v_total = v_total + v_count;
+        set v_count = v_count + 1;
+
+        until v_count > p
+
+        end repeat;
+
+        return v_total;
+    end//
+    delimiter ;  
+
+  □ LOOP
+  
+    loop
+      敘述;         # 不斷執行這個敘述不會停止
+     end loop;
+
+■ 標籤
+
+  - 在一般的狀況下，通常不需要為區塊設定標籤。如果為了控制sotred routines的執行流程，才會設定區塊的標籤。
+  - 搭配使用「LEAVE」敘述來控制流程，就可以控制「LOOP」迴圈在需要的時候離開。
+
+      delimiter //
+      create function s(p int)
+      returns int
+      begin
+        declare v_count int default 1;
+          declare v_total int default 0;
+
+        my_laber:loop
+          set v_total = v_total + v_count;
+          set v_count = v_count + 1;
+
+              if v_count > p then
+            leave my_label;             # 離開標籤區塊
+              end if;
+          end loop;
+
+          return v_total;
+      end//
+      delimiter ;
+
+  - 設定標籤以後，也可以搭配使用「ITERATE」敘述來控制流程。
+
+    delimiter //
+    create function s(p int)
+    returns int
+    begin
+      declare v_count int default 0;
+      declare v_total int default 0;
+
+      my_laber:while v_count <= p do
+
+            set v_count = v_count + 1;
+
+            if v_count % 2 = 0 then
+              iterate my_label;        # 回到標籤區塊開始的地方
+            end if;
+
+            set v_total = v_total + v_count;
+
+        end while my_label;
+
+        return v_total;
+    end//
+    delimiter ;
+
+參考來源：MySQL 超新手入門（14）Stored Routines 的變數與流程
+http://www.codedata.com.tw/database/mysql-tutorial-14-stored-routines-variable-flow/
