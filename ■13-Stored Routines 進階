@@ -1,0 +1,40 @@
+■ 錯誤編號
+
+  - MySQL用來表示錯誤的編號(錯誤訊息)有兩種：
+  
+    1. MySQL資料庫伺服器用的錯誤編號，為四位數，如1146。
+    2. 各種資料庫軟體都適用的「SQL state」編號，為五個字元的字串，如42S02。
+  
+■ Handlers
+
+  - 在寫stored routine時，MySQL提供一種特殊的宣告語法，可以使用它宣告habdler，可以處理stored routine可能發生的錯誤。
+  
+    create procedure cmdev.test_handler (p int, a varchar(16), b varchar(16))
+    begin
+      
+      declare exit handler for SQLSTATE "23000"  # 如果發生23000錯誤，顯示錯誤訊息並離開
+      begin
+        select "Error";
+      end;
+      
+      insert into cmdev.dept
+      values (p , a, b);
+      select "Success!";
+    end
+     
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
