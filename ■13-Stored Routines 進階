@@ -22,19 +22,78 @@
       select "Success!";
     end
      
+     
+   - 加入handler宣告的stored routines，在執行過程中如果沒有發生任何問題，handler是沒有任何作用的。
+   - 如果在執行過程中發生任何問題了，MySQL會使用發生的錯誤編號，與你在handler宣告中指定的錯誤執行比對的工作，如果一樣的話，接下來就交由handler來處理這個錯誤，MySQL就不會中斷執行與回傳錯誤。
+   - 在宣告handler時，除了指定handler要處理哪一種錯誤外，還要根據自己的需求，決定處理錯誤以後的後續流程(continue、exit、undo)。
 
+   - 若希望無論有無出錯，都將結果儲存在cmdev.deptlog表格中
 
+    create procedure cmdev.test_handler2 (de int, dn varchar(16), l varchar(16))
+    begin
+      
+      declare message varchar(64) default "Success";  # 宣告一個紀錄訊息的字串變數，預設值為成功
+      
+      decalre continue handler for sqlstate "23000"   # (1)若發生這種錯誤，因continue(3)繼續往後執行
+      begin
+        set message = "Error";                        # (3)把訊息設為Error
+      end;
+      
+      insert into cmdev.dept
+      values (de , dn, l);
+      insert into cmdev.deptlog(message) values(message);  # (4)最後把訊息新增到deptlog表格中
+    end
 
+  - 若想分別處理兩種錯誤的話：
 
+    create procedure cmdev.test_handler3 (de int, dn varchar(16), l varchar(16))
+    begin
+      
+      declare message varchar(64) default "Success";  # 宣告一個紀錄訊息的字串變數，預設值為成功
+      
+      decalre continue handler for 1048   # 不允許null值的MySQL錯誤標號1048
+      begin
+        set message = "can't be null";                       
+      end;
+   
+      decalre continue handler for 1062   # 不允許null值的MySQL錯誤標號1062
+      begin
+        set message = "duplicate key";                     
+      end;   
+   
+      insert into cmdev.dept
+      values (de , dn, l);
+      insert into cmdev.deptlog(message) values(message); 
+    end
 
+■ Conditions
 
-
-
-
-
-
-
-
-
-
-
+  - 可以宣告「conditions」用來代表某一種問題給handler使用，如下分別不允許null值與索引值重複的錯誤：
+  
+    create procedure cmdev.test_handler4 (...)
+    begin
+      
+      declare message varchar(64) default "Success";  # 宣告一個紀錄訊息的字串變數，預設值為成功      
+      
+      decalre c_null condition for 1048;         # 宣告一個c_null的condition，代表不允許null的MySQL錯誤編號1048      
+      decalre c_dupkey condition for 1062;       # 宣告一個c_dupkey的condition，代表不允許null的MySQL錯誤編號1062      
+      
+      decalre  condition handler for c_null      # 使用condition名稱設定handler的條件
+      begin
+        set message = "Can't be null";                        
+      end;
+      
+      decalre  condition handler for c_dupkey    # 使用condition名稱設定handler的條件
+      begin
+        set message = "duplicate key;                        
+      end;
+  
+  
+■ Cursors  
+  
+  - 如果stored routines需要針對一個查詢結果中的每一筆紀錄執行需要的處理工作，你可以宣告一個「cursor」來代表一個查詢的結果，並且使用cursor依序處理所有紀錄資料。
+  
+   be continue........
+  
+參考來源：MySQL 超新手入門（15）Stored Routines 進階
+http://www.codedata.com.tw/database/mysql-tutorial-15-stored-routines-advanced/
