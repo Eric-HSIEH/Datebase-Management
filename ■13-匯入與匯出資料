@@ -1,0 +1,108 @@
+■ 備份與回復
+
+  - 備份資料的工作稱為「匯出資料、exporting data」。
+  - 回復資料的工作稱為「匯入資料、importing data」。
+
+■ 使用SQL敘述匯出資料(SELECT INTO OUTFILE)
+
+  - 匯出資料
+    
+    - 若匯出資料遇到NULL值，會使用「\N」儲存
+  
+    select * into outfile "C:/cmdev/data/out/dept.txt"   # 使用「INTO OUTFILE」子句指定檔案名稱，無論作業系統都要使用「/」
+    fields terminated by "|"           # MySQL預設分隔字元為TAB，可用此行設定新的分隔字元
+    fields enclosed by "*"             # 設定包圍欄位資料的字元符號(如：**DALLAS**)
+    fields escaped by "$"              # 預設的跳脫字元為"\"，可設定新的跳脫字元符號
+    lines starting by ">>>" terminated by "\n"   # 可分別設定開始與結束的字串
+    fron cmdev.dept
+
+■ 使用SQL敘述匯入資料(LOAD DATA)
+
+  □ 指定資料檔案
+  
+    - 指定資料若沒有磁碟機代號，會使用目前工作中的磁碟機
+    - 指定資料若沒有磁碟機代號、資料夾符號，會使用目前工作中的資料夾
+  
+    use 資料庫名稱;                      # 或在第三行表格名稱前面加上「資料庫名稱.」
+    load data [local] infile "檔案名稱"  # 若資料放在用戶端的電腦裡，要加上「LOCAL」；若資料在伺服器的電腦中，則不能加上「LOCAL」
+    into table 表格名稱
+
+  □ 指定資料格式
+
+    - 若要匯入的檔案為CSV，要使用「FIELDS」、「LINES」：
+    
+      load data local infile "C:/cndev/data/in/newdeptcsv.txt"
+      into table cmdev.dept
+      fields terminated by ","            # 下三行為設定資料為CSV格式
+             enclised by """
+      lines terminated by "\r"
+
+  □ 處理匯入的資料
+  
+    - 在「LOAD DATA INFILE」中指定匯入資料的數量和欄位：
+    
+      load data local infile "C:/cmdev/data/in/newdept2.txt"
+      into table cmdev.dept
+      ignore 1 lines (deptno, dname)  # 會跳過第一筆資料，並且只會匯入deptno及dname兩個欄位
+
+    - 在「LOAD DATA INFILE」中加入使用者變數：
+
+      load data local infile "C:/cmdev/data/in/newemp.txt"
+      into table cmdev.emp
+      (empno, @v_ename, @v_job)    # 第一個資料儲存在「empno」欄位；員工名稱和職務先儲存在使用者變數
+      set ename = UPPER(@v_ename),  # 將使用者變數轉成大寫，再儲存到「ename」、「job」欄位
+          job = IPPER(@v_job)
+
+  □ 索引鍵重複
+  
+    - 在新增、修改或匯入資料到資料庫時，都可能發生索引值重複的錯誤，可使用IGNORE和REPLACE決定如何處理。
+    
+      load data infile "C:/cmdev/data/in/newdept3.txt"
+      ignore into table cmdev.dept        # 忽略索引重複的資料
+
+      load data infile "C:/cmdev/data/in/newdept4.txt"
+      replace into table cmdev.dept        # 更新索引重複的資料
+
+  □ 匯入資訊
+  
+    - Records：表示從資料檔案中讀取的資料數量
+    - Deleted：表示在發生索引重複的情況下更新資料的數量
+    - Skipped：表示在發生索引重複的情況下被忽略的資料數量
+    - Warnings：表示資料檔案中有問題的資料數量，例如轉換Hello字串為數值
+  
+■ 使用mysqldump程式匯出資料
+
+  
+
+
+
+
+
+
+
+
+
+
+
+參考來源：MySQL 超新手入門（19）匯入與匯出資料
+http://www.codedata.com.tw/database/mysql-tutorial-19-outfile-dump-infile-import/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
