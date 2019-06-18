@@ -72,37 +72,30 @@
   
 ■ 使用mysqldump程式匯出資料
 
+  - MySQL提供許多不同應用的工具程式，讓你可以在命令提示字元中執行，這些工具程式都是MySQL才有的，而且它們並不是SQL敘述。
+  - 可以使用「mysqldump」工具程式匯出資料：
   
+    ． -host=資料庫伺服器 (或-h 資料庫伺服器)  # 指定要連線的伺服器
+    ． -user=使用者帳號(或-u 使用者帳號)       # 指定要連線的使用者帳號
+    ． -password[=密碼](或-p 密碼)            # 指定要連線的密碼
+    
+    mysqldump -u root cmdev  # 沒有使用-host表示連線到localhost；指定帳號為root；指定cmdev資料庫中所有表格
 
+    ． -result-file=檔案名稱  # 指定匯出資料的檔案名稱，資料夾符號須使用/
+    ． -all-databases        # 匯出資料庫伺服器中所有資料
+    ． -tab=資料夾            # 匯出資料檔案存放的資料夾
 
+    mysqldump --user=root --result-file=cmdev.sql cmdev  # 將輸出的內容儲存為指定的檔案cmdev.sql，但只會儲存建立表格的敘述
+    mysqldump --user=root --tab=C:/cmdev/data/out cmdev  dept # 使用--tab指定輸出資料夾為「C:/cmdev/data/out」；指定cmdev資料庫中的dept表格；會輸出兩個資料，分別為dept.sql(內容為建立表格的敘述)、dept.txt(內容為以tab分隔符號的表格資料)
 
+    ． -fields-terminated-by=字串            # 設定欄位資料間的分隔符號
+    ． -fields-enclosed-by=字元              # 設定欄位資料間的前後字元
+    ． -fields-optionally-enclosed-by=字元   # 設定欄位資料間的前後字元
+    ． -fields-escaped-by=字元               # 設定跳脫字元的符號
+    ． -lines-terminated-by=字串             # 設定每一行的結尾
 
-
-
-
-
-
+■ 使用mysqlimport程式匯入資料
 
 
 參考來源：MySQL 超新手入門（19）匯入與匯出資料
 http://www.codedata.com.tw/database/mysql-tutorial-19-outfile-dump-infile-import/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
