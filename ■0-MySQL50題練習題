@@ -1,0 +1,155 @@
+前提：
+
+1. Student(SId, Sname, Sage, Ssex)
+2. Course(CId, Cname, TId)
+3. Teacher(TId, Tname)
+4. SC(SId, CId, score)
+
+----------------------------------------------------------------------------------------------
+
+1. 查詢" 01 "課程比" 02 "課程成績高的學生的資訊及課程分數
+
+select * from student left join(
+	select t1.SId, s1, s2 from
+		(select SId, score s1 from SC where SC.CId = "01") t1,
+		(select SId, score s2 from SC where SC.CId = "02") t2
+	where t1.SId = t2.SId and t1.s1 > t2.s2 
+) L
+on student.SId = L.SId;
+
+2. 查詢同時存在" 01 "課程和" 02 "課程的情況
+
+select * from
+	(select * from SC where SC.CId = "01") t1,
+	(select * from SC where SC.CId = "02") t2
+where t1.SId = t2.SId
+
+3. 查詢存在" 01 "課程但可能不存在" 02 "課程的情況(不存在時顯示為 null )
+
+select * from
+(select * from SC where CId = "01") t1
+left join
+(select * from SC where CId = "02") t2
+on t1.SId = t2.SId
+
+4. 查詢不存在" 01 "課程但存在" 02 "課程的情況
+
+select * from SC
+where SC.SId not in (select SId from SC where SC.CId = "01" ) and SC.CId = "02"
+
+5. 查詢平均成績大於等於 60 分的同學的學生編號和學生姓名和平均成績
+
+select Student.SId, Sname, Ascore from Student,
+(select SC.SId, avg(score) Ascore from SC group by SId having Ascore > 60) L
+where Student.SId = L.SId
+
+6. 查詢在 SC 表存在成績的學生資訊
+
+select distinct student.* from student,SC 
+where student.SId = SC.SId
+
+7. 查詢所有同學的學生編號、學生姓名、選課總數、所有課程的總成績(沒成績的顯示為 null )
+
+select student.SId, student.Sname,r.Tcourse,r.Tscores
+from student, 
+(select SC.SId, count(CId) Tcourse, sum(score) Tscores from SC group by SC.SId)r
+where student.SId = r.SId
+
+8. 查有成績的學生資訊
+
+select * from student 
+where exists(select SC.SId from SC where student.SId = SC.SId)
+
+9. 查詢「李」姓老師的數量
+
+select count(Tname) from teacher where Tname like "李%"
+
+10. 查詢學過「張三」老師授課的同學的資訊
+
+select student.* from student, course, teacher, SC
+where
+	student.SId = SC.SId
+    and course.CId = SC.CId
+    and course.TId = teacher.TId
+    and tname = "張三"
+    
+11. 查詢沒有學全所有課程的同學的資訊
+
+select student.* from student
+where student.SId not in (
+	select SC.SId from SC
+    group by SC.SId
+    having count(SC.CId) = (select count(CId) from course)
+)
+
+12. 查詢至少有一門課與學號為" 01 "的同學所學相同的同學的資訊
+
+select * from student where student.SId in 
+(select SId from SC where SC.CId in
+(select CId from SC where SId = "01"))
+
+13. 查詢和" 01 "號的同學學習的課程 完全相同的其他同學的資訊
+
+select * from student where sid in 
+(select sid from SC where sid not in          # 跟01同學課程相同的學生編號
+(select sid from SC where cid not in (select cid from SC where sid='01')) # 跟01同學課程不同的學生編號
+group by sid 
+having count(*)=(select count(*) from SC where sid='01') and sid != '01'); # 跟01同學課程數目相同
+
+14. 查詢沒學過"張三"老師講授的任一門課程的學生姓名
+
+select * from student
+where student.sid not in(
+    select sc.sid from sc,course,teacher 
+    where
+        sc.cid = course.cid
+        and course.tid = teacher.tid
+        and teacher.tname= "張三"
+);
+
+15. 查詢兩門及其以上不及格課程的同學的學號，姓名及其平均成績
+
+select student.sid, student.sname, AVG(sc.score) from student,sc
+where 
+    student.sid = sc.sid and sc.score<60
+group by sc.sid 
+
+16. 檢索" 01 "課程分數小於 60，按分數降序排列的學生資訊
+
+select * from student, SC
+where student.SId = SC.SId and SC.CId = "01" and SC.score < 60 order by SC.score desc 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
