@@ -119,7 +119,32 @@ group by sc.sid
 select * from student, SC
 where student.SId = SC.SId and SC.CId = "01" and SC.score < 60 order by SC.score desc 
 
+17. 按平均成績從高到低顯示所有學生的所有課程的成績以及平均成績
 
+select * from SC
+left join(
+	select SId, avg(score) as Ts from SC group by SId
+    )r
+on SC.SId = r.SId
+order by Ts desc
+
+18. 查詢各課程ID、最高分、最低分、平均分、選修人數、及格率、中等率、優良率、優秀率，並依選修人數遞減排序，若人數相同則依照課ID遞增排序
+
+select 
+sc.CId ,
+max(sc.score)as 最高分,
+min(sc.score)as 最低分,
+AVG(sc.score)as 平均分,
+count(*)as 選修人數,
+sum(case when sc.score>=60 then 1 else 0 end )/count(*)as 及格率,
+sum(case when sc.score>=70 and sc.score<80 then 1 else 0 end )/count(*)as 中等率,
+sum(case when sc.score>=80 and sc.score<90 then 1 else 0 end )/count(*)as 優良率,
+sum(case when sc.score>=90 then 1 else 0 end )/count(*)as 優秀率 
+from sc
+GROUP BY sc.CId
+ORDER BY count(*)DESC, sc.CId ASC
+
+19. 
 
 
 
